@@ -4,3 +4,5 @@ This documentation will include the basics of:
 Android Studios (the platform where you will put all of the code for your robot)
 OpenCV (a visual library which allows you to use your camera's phone)
 RoadRunner (a movement library which allows your robot to drive more quickly using curved paths instead of going in straight lines and pivoting to turn)
+
+You will find the documentation in the README. 
