@@ -1,0 +1,6 @@
+Hi, the Lincoln Robotics teams of 2020 were unable to compete at worlds because of the Corona virus, and, with the free time we gained, we would like to document the knowledge that we gained as coders to help jumpstart your coding ability!
+
+This documentation will include the basics of:
+Android Studios (the platform where you will put all of the code for your robot)
+OpenCV (a visual library which allows you to use your camera's phone)
+RoadRunner (a movement library which allows your robot to drive more quickly using curved paths instead of going in straight lines and pivoting to turn)
