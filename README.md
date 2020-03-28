@@ -232,8 +232,9 @@ IMU's (aka Gyroscopes) aren't perfectly accurate. But, they seem to be consistan
 Ex:
 
 ```
-facingBackAngle = Math.PI/2
-correctionAngle = Math.PI/16 # Some small angle which can shift the angle to correct it
+facingBackAngle = Math.PI/2;
+correctionAngle = Math.PI/16; # Some small angle which can shift the angle to correct it
+
 drive.followTrajectory(
 	drive.trajectoryBuilder(drive.getPoseEstimate(), true)
 		.reverse() # NOTE: THIS IS DEPRACATED IN THE RECENT VERSION SO READ THE ROADRUNNER DOCUMENTATION 
