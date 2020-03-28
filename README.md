@@ -133,3 +133,113 @@ So we should only use P, right? Sadly, life is not always that easy. Excessive P
 That’s only one third of it all. There’s still integral and derivative! Now, an integral is essentially the sum of a set of values over time. In our case, the integral represents the sum of the error over time multiplied by the time difference between when we read those errors, so it’ll keep it smaller than it would be. All of this is done automatically, so unless you really want to delve into the nitty gritty, don’t worry about it (hey, look, my team’s name). All you really need to know is that adjusting the integral term pushes the current state closer to the endpoint. For example, if for some reason a pure P controller is unable to reach the end goal, you could sprinkle in a little I to push it closer to the end. However, this adds instability to the system, where certain circumstances might lead the controller to spaz out. Hopefully you don’t do that, but only time will tell. Note that, as the Roadrunner page discusses, it is usually a bad idea to try to add I in, and you would more likely use something called a feedforward controller which adds a constant to the change to counteract any underlying factors, such as gravity or friction. I’m not sure if this is automatically utilized or not in Roadrunner, so it may require you to customize the code to your liking.
 Lastly, there’s the derivative term. A derivative is simply the rate of change of something at that exact moment. We can’t do that, so what we can do is get a rough estimate using the magic of first principles. In other words, we take the previous error reading, subtract that from our current error reading, and then divide by the time difference. This is also automatic. What this will do is dampen changes, causing the system to be slightly slower at responding to changes. It is best used to stop oscillations from P. In other words, it may be best to tune P-D-I, which is less catchy that PID but may work better. The biggest downside to using this constant for drive velocity is that, when our team used it, it may have caused our robot to be slower to respond to errors while following trajectories, causing it to be off. Thus, be careful.
 All in all, **be careful tuning your PIDs**. They form the foundation of how well your robot follows trajectories, and messing it up may cause large errors much later down the line.
+
+# Tips and Tricks for Making an Auto with Roadrunner by Hunter Webb
+
+After the knowledge storm you have been pounded with in the previous section you are probably ecstatic to start testing your robot. 
+
+But wait?! I decided to skip this section and test my robot by myself and now it is just turning in circles, and now i'm confused as to why nothing is working. Now, my friend, you have completed the first step of creating the most perfect roadrunner code, failing miserably. 
+
+I had my robot kamakazi into three different walls, the shins of a builder who was mocking the robots movement, and tornado spin in circles across the field so many times before I had a really solid auto. This is all part of the process, and **I am now here** to show you how to quickly and precisely code to get your robot going correctly. 
+
+Firstly, tell yourself that you are valuable because you are, and what makes you valuable is your **TIME** which **CANNOT** be wasted when you are working. So a few ground rules for our pilgrimage for the auto we want.
+
+1. NO building in our auto time
+2. NO having other people want to drive around and mess with the robot
+3. YES having a sidekick builder to help you set up the field / plug in the phone is great
+4. NO testing once and assuming that it works
+5. YES take breaks
+6. NO NO NO NO NO STARTING YOUR AUTO THE NIGHT, DAY, OR WEEK BEFORE THE COMPETITION
+	- It is death, trust me here, I am on your side. At least have two weeks before the tournament to start it, and I was able to do that with two free periods every other day to just do the auto. 
+	
+Now, lets get to work.
+
+## Pre-Testing Tips
+
+### Think about the Path of your Full Auto
+
+Have a clear picture in your mind or physically on paper of how you want the robot to move and where you want it to move. We can't be wasting our time making that idea clear while we have the robot zooming around. 
+
+### Zoom but Not Too Much
+
+Start with a lower max velocity / acceleration in roadrunner for your robot (in the DriveConstants call) initially and work up from there, but keep in mind that wheel slippage from moving faster can mess with your pathing.
+
+### Strafing is Wack
+
+I used strafing in a critical way in our auto, but it completely messed up the internal localization (it thought that it had strafed 10 inches farther than it had). Also, depending on the battery strafing was wack. Although, this was without odometry so you would likely have more luck there, but I would still use strafing with caution.
+
+### Heading is in Radians
+
+THE HEADING IS IN RADIANS, REPEAT, THE HEADING IS IN RADIANS AND WATCH KHAN ACADEMY IF YOU'RE LIKE WTF ARE RADIANS. 
+The heading is the third parameter in the Pose2D class they use, so the following code has the robot ending up facing 180 degrees from its initial heading
+
+```
+.splineTo(new Pose2d(15, 20, Math.PI))
+
+// Math.PI == 180 degrees
+// Math.PI / 2 == 90 degrees
+// -Math.PI / 2 == -90 degrees
+
+```
+
+## Testing Tips
+
+### Localization
+
+This is where Jonathan and I split on how we made our autos. He preferred to have (0, 0) be the center of the field like roadrunner uses for their GUI. However, I found it much more intuitive to have (0, 0) be where the robot began for my autos which ends up being just about as good as Jonathan's method with some advantages (ex. you can code without needing the GUI) and disadvantages (ex. you have to transform coordinates in the GUI to be what you want). 
+
+However, the following tips still apply regardless of which way you want to do it, and I trust you to do what is best for you. Mostly because it doesn't matter whether or not I trust you. But be assured, I do.
+
+If you choose my method, a helpful comment I would put into documents to help me work out which way the robot would go with coordinate changes is here:
+```
+/*
+        Notes:
+
+        (In terms of the original heading)
+        -Y: Robot goes to a position towards the right
+        Y: Robot goes to a position towards the left
+        X: Robot moves to a position Fowards from the current position
+        -X: Robot moves to a position Backwards from the current position
+
+	Positive angle turns left
+        Negative angle turns right
+ */
+```
+
+### Driving in Parts
+
+One of the biggest advantages that I believe my team had in our auto was our philosophy of *perfection in pieces*.
+
+The **BEST** way for you to make an auto quickly and accurately is to take that image of what you want your path to be, and break it down into piece to make. In our competition format, this included picking up a lego block thing and putting it on a platform and going back for more lego blocks. 
+
+Thus, the path was broken down into:
+1. Pick up the block 
+2. Drive to the platform
+3. Drop the block off
+4. Drive back to where the other blocks are
+5. Pick up another block
+...
+
+Then we code each step in roadrunner with a different trajectory builder and wait()/Thread.sleep() methods when needed for motors and servos to do motor/servo things. 
+
+This step by step process ensures that you don't rush ahead to Step 3: Drop the block off when you can't even accurately pick up the block in the first place. Then, when you fix picking up the block, your step three doesn't really work because the robot is in a different place with a different heading. 
+
+
+### Small Angle Corrections
+
+IMU's (aka Gyroscopes) aren't perfectly accurate. But, they seem to be consistantly inaccurate which is amazing. That means that with our heading we can add or subtract small angle values to make the robot have a heading that is straighter. 
+
+Ex:
+
+```
+facingBackAngle = Math.PI/2
+correctionAngle = Math.PI/16 # Some small angle which can shift the angle to correct it
+drive.followTrajectory(
+	drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+		.reverse() # NOTE: THIS IS DEPRACATED IN THE RECENT VERSION SO READ THE ROADRUNNER DOCUMENTATION 
+		.splineTo(new Pose2d(30, 20, facingBackAngle + correctionAngle)) // Aligned to face backwards when going to the platform
+		.build()
+);
+```
+
+
