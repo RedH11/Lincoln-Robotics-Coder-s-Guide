@@ -26,9 +26,11 @@ The TrajectoryBuilder
 
 Shall we start?
 #### Step ONE: The Drive
-	The backbone of all your movements will be the Drive. For those of you who aren’t lazy bastards, there’s an option to custom-create your Drive from scratch, but beware, you’ll need to know exactly what you’re doing or you’ll just end up crashing your robot into the wall at ludicrous speed.
+
+The backbone of all your movements will be the Drive. For those of you who aren’t lazy bastards, there’s an option to custom-create your Drive from scratch, but beware, you’ll need to know exactly what you’re doing or you’ll just end up crashing your robot into the wall at ludicrous speed.
 	Anyhow, for the lazy majority of you, there is a customized project called Roadrunner-quickstart which, as the name implies, contains everything needed for a quickstart to Roadrunner. This includes various files in TeamCode under the drive folder which contain all sample drive bases. Under the opmode folder are a bunch of tests for tuning and whatnot: pay no attention to those fow now. At this point, you’ll need to take a good, long gander at your robot. Is it mecanum? Is it holonomic? Or are you lazy and just went for a glorified push-bot? Choose the right drive base accordingly.
 	Afterwards, go to the constructor. If you don’t know what a constructor is, kindly ask someone else to be the coder. There you will (hopefully) find a lot of TODO comments near the bottom of the constructor. These mainly include changing names until it fits your hardware configuration, remapping the axes of the IMU, reversing a few motors, and then finally having the option to use localization. This means odometry or any external ways of calculating your robot’s position on the field. If you have odometry wheels and encoders, go ahead and use them! They can improve your accuracy on the field significantly, although you could go ahead and try to use Roadrunner without localization. Roadrunner will just estimate using encoder readings from your powered wheels, which slowly drifts off. If you want to use localization go ahead and read the section below. Otherwise, skip ahead.
+	
 ##### Using Localization
 You poor bastard. You mad lad. You absolute shell of a human being. You desire more tuning than you have to do? I respect the hell out of that. Here’s more tuning.
 Customize the StandardTrackingWheelLocalizer.java to your odometry setup. If you’re using three wheels to track position, you can leave it mostly as is besides a few minor adjustments to a few values. These include:
@@ -85,16 +87,19 @@ Max angular jerk
 
 Oh, you thought tuning was over? No, sir/ma’am, there’s even more. These may be found in your corresponding drive classes. Mecanum/holonomic/tank have their own corresponding parameters. We used mecanum, which includes heading and translational (strafing) PID constants, but we’re not sure for the others. Those will involve you personally investigating them, and definitely not me. At the very end, after running all the various tuners, see all your hard work pay off with the lame SplineTest.java. Have fun with your first month of using Roadrunner.
 #### Step TWO: The TrajectoryBuilder
-	The hard part’s finally done, unless you mess up tuning somewhere along the way in which case you’ll have to perform every test again. Anyhow, after all that, you can finally build some cool ass paths, right? Yes. No more catches.
+
+The hard part’s finally done, unless you mess up tuning somewhere along the way in which case you’ll have to perform every test again. Anyhow, after all that, you can finally build some cool ass paths, right? Yes. No more catches.
 	As a quick setup, it’s important to set the pose estimate of the drive to wherever you start. This can be done using the setPoseEstimate(Pose2d) method. This way, you can create trajectories using absolute positions relative to the field rather than relative to your robot.
 	The core part of trajectory building is, unsurprisingly the TrajectoryBuilder which can be fetched from the drive class using their public trajectoryBuilder(...) methods. To actually force your robot to follow the trajectory, you should call the drive’s followTrajectory(Trajectory) method. Afterwards, it’s essentially up to you to explore all the different pathing possibilities. The main ones we used were splineTo(Pose2d) and strafeTo(Vector2d). We also used reverse(), but that method has been removed in v0.5.0 and has been replaced with setting whether the TrajectoryBuilder is reversed or not within its constructor. Aside from that, we also sometimes used forward(double), back(double), strafeLeft(double), and strafeRight(double). Some work better than others for some reason. A full list of the 0.5.0 methods can be found in this documentation. To finish a trajectory, simply call .build() at the very end of the long list of methods, which will return a Trajectory instance. As an example, here’s a quick writeup to reverse to the center of the field (0, 0) from wherever it is, and then move 5 inches:
 
+```
 drive.followTrajectory(
 	drive.trajectoryBuilder(drive.getPoseEstimate(), true)
 		.splineTo(new Pose2d(0, 0, 0))
 		.forward(5)
 		.build()
 );
+```
 
 Some methods take Vector2d as an argument, while some take Pose2d as an argument. The difference is that a Vector2d is purely position, while a Pose2d ends with the heading. Please note we are by no means experts at Roadrunner, so there are various things we never really looked into. These include HeadingInterpolators, which allow you to customize how the robot turns in its movements, and adding markers, which allow commands to execute at certain points along the trajectory. Lastly, while building trajectories using the TrajectoryBuilder, it is very important to keep the following ideas in mind:
 Trajectories default to going forwards. If you tell your robot to move backwards by an inch without properly reversing it, it will do a whole ass circle.
