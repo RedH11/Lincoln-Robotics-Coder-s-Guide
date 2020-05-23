@@ -1,7 +1,43 @@
 # Lincoln-Robotics-Coders-Guide
 
-## Setting Up Android Studios
-## Using EasyOpenCV
+## Setting Up Android Studios by Hunter Webb
+
+This is pretty simple, but just install Android Studios from [here](https://developer.android.com/studio). Also, the platform that you will likely be using it Github to share code which you are going to familiarize yourself with, and while some will opt to learn the command line code to use it (pro gamer flex right there) I, as a normal person trying to maintain a social life alongside robotics, opt to use Github Desktop which is a UI interface that allows you to use Android Studios easily with Github by cloning the repository and then opening it with Android studios and pushing all commits and pulling all changes through the program. Otherwise, a third alternative is to learn how to use the VCS tab in an Android Studios Project to push and pull code which is also simple enough.
+
+With that done, open your project and simply start coding after you have pulled the right repository to use for Android Studios.
+
+## Using EasyOpenCV by Hunter Webb
+
+EasyOpenCV is a great way to take images from your phone's camera and do useful stuff with it! In the year that I did robotics, I even was able to wrangle it to do a basic neural network to detect different objects. It worked! Buttt... the phone couldn't handle the processing and 1 frame every few seconds wouldn't cut it in competition, so we opted to just use the basics of seeing the colors on the screen to determine what was there with our code. 
+
+To start the process, you can always reference the code in CLoud-Robotics-FTC in my branch, HunterW, and in teamcode there is the Vision folder with my neural network code that contains the camera.
+
+The first step is to initialize the camera so that you can start its stream when you want to. The method I used was:
+```
+public void initCamera() {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        phoneCam.openCameraDevice();
+        phoneCam.setPipeline(new StageSwitchingPipeline());
+        phoneCam.startStreaming(rows, cols, OpenCvCameraRotation.UPRIGHT); //display on RC
+}
+```
+
+
+This uses the class StageSwitchingPipeline which communicates the frame or MAT (for Matrix of pixels) to the code that you want to use. In my code I embedded this in another class and used it to pull the MAT's for the neural network to analyze. 
+
+```
+class StageSwitchingPipeline extends OpenCvPipeline {
+	...
+	code
+	...
+}
+```
+
+Alternatively, you can save the frames to the phone or display them on the screen as shown in my code, and you can also draw shapes on the MAT. Therefore, if you want the robot to look at a certain part of the screen to see if something is there when it is in a reproducible position in competition (likely the starting position) you can draw a shape to find the coordinates of where the object(s) will/won't be to use for pathing/decision making.
+
+
+
 ## Using RoadRunner by Jonathan Zhao
 
 So you want to learn how to build trajectories, huh kid?
